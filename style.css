@@ -847,14 +847,13 @@ button { cursor: none; font-family: inherit; border: none; background: none; }
 .team-skin { background: linear-gradient(180deg, var(--bg-3) 0%, var(--bg-2) 100%); overflow: hidden; }
 .team-skin img { width: 100%; height: auto; transition: transform 0.5s ease; }
 
-/* Skin texture preview */
+/* Skin face portrait — crops the 8×8 face from the 64×64 texture */
 .team-skin.skin-preview-wrap {
   display: flex;
   align-items: center;
   justify-content: center;
-  height: 240px;
-  background: radial-gradient(ellipse at center, rgba(139,92,246,0.08) 0%, #0a0a14 100%);
-  padding: 20px;
+  height: 220px;
+  background: radial-gradient(ellipse at center, rgba(139,92,246,0.1) 0%, #080810 100%);
   position: relative;
   overflow: hidden;
 }
@@ -862,25 +861,40 @@ button { cursor: none; font-family: inherit; border: none; background: none; }
   content: '';
   position: absolute;
   inset: 0;
-  background: 
-    linear-gradient(rgba(139,92,246,0.04) 1px, transparent 1px),
-    linear-gradient(90deg, rgba(139,92,246,0.04) 1px, transparent 1px);
-  background-size: 12px 12px;
+  background:
+    linear-gradient(rgba(139,92,246,0.05) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(139,92,246,0.05) 1px, transparent 1px);
+  background-size: 14px 14px;
 }
-.skin-preview {
-  width: 128px;
-  height: 128px;
+.skin-face {
+  /* 
+    Minecraft skin is 64×64px.
+    Face front: x=8–16, y=8–16  (8×8 pixels).
+    Scale 20× → display at 160×160px.
+    Full bg: 64×20 = 1280px.
+    Offset: 8×20 = 160px from top-left.
+  */
+  width: 160px;
+  height: 160px;
+  background-size: 1280px 1280px;
+  background-position: -160px -160px;
   image-rendering: pixelated;
   image-rendering: crisp-edges;
   position: relative;
   z-index: 1;
-  border-radius: 8px;
-  box-shadow: 0 0 24px rgba(139,92,246,0.3), 0 8px 24px rgba(0,0,0,0.5);
+  border-radius: 12px;
+  box-shadow:
+    0 0 0 4px rgba(139,92,246,0.2),
+    0 0 32px rgba(139,92,246,0.35),
+    0 12px 32px rgba(0,0,0,0.6);
   transition: transform 0.4s ease, box-shadow 0.4s ease;
 }
-.team-card:hover .skin-preview {
-  transform: scale(1.1) translateY(-4px);
-  box-shadow: 0 0 40px rgba(139,92,246,0.5), 0 16px 40px rgba(0,0,0,0.6);
+.team-card:hover .skin-face {
+  transform: scale(1.08) translateY(-4px);
+  box-shadow:
+    0 0 0 4px rgba(139,92,246,0.4),
+    0 0 48px rgba(139,92,246,0.5),
+    0 20px 48px rgba(0,0,0,0.7);
 }
 .team-card:hover .team-skin img { transform: scale(1.03); }
 .team-skin-empty {
