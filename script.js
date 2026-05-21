@@ -12,70 +12,108 @@ document.addEventListener('DOMContentLoaded', () => {
       {
         id: 'skin-minecmasters',
         skin: 'assets/minecmasters.png',
-        animation: 'walk',   // walking pose
-        animSpeed: 0.6
+        pose: 'archer',        // holding bow pose
+        rotateY: -0.4
       },
       {
         id: 'skin-itsmerishi',
         skin: 'assets/itsmerishi4228.png',
-        animation: 'run',    // running pose
-        animSpeed: 0.9
+        pose: 'victory',       // "you can't beat me" arms-up pose
+        rotateY: 0
       },
       {
         id: 'skin-altsensei',
         skin: 'assets/altsensei.png',
-        animation: 'idle',   // idle pose
-        animSpeed: 0.4
+        pose: 'sleeping',      // sleeping / laid back pose
+        rotateY: 0.3
       }
     ];
 
-    members.forEach(({ id, skin, animation, animSpeed }) => {
+    members.forEach(({ id, skin, pose, rotateY }) => {
       const canvas = document.getElementById(id);
       if (!canvas) return;
 
       const viewer = new skinview3d.SkinViewer({
         canvas,
-        width: 180,
-        height: 250,
+        width: 200,
+        height: 270,
         skin,
       });
 
-      // Transparent background so our CSS gradient shows
+      // Transparent so card CSS gradient shows through
       viewer.renderer.setClearColor(0x000000, 0);
 
-      // Subtle global light
-      viewer.globalLight.intensity = 3;
-      viewer.cameraLight.intensity = 1;
+      // Lighting
+      viewer.globalLight.intensity = 3.5;
+      viewer.cameraLight.intensity = 0.6;
 
-      // Slight camera angle
-      viewer.camera.rotation.x = -0.2;
-      viewer.camera.position.y = 20;
-      viewer.camera.position.z = 55;
+      // Camera
+      viewer.camera.position.z = 60;
+      viewer.camera.position.y = 18;
+      viewer.camera.rotation.x = -0.15;
 
-      // Set animation per member
-      if (animation === 'walk') {
-        const anim = viewer.animations.add(skinview3d.WalkingAnimation);
-        anim.speed = animSpeed;
-      } else if (animation === 'run') {
-        const anim = viewer.animations.add(skinview3d.RunningAnimation);
-        anim.speed = animSpeed;
-      } else if (animation === 'idle') {
-        // Idle — just slow rotate
-        viewer.autoRotate = true;
-        viewer.autoRotateSpeed = 0.5;
-      }
+      // Base Y rotation per member
+      viewer.playerObject.rotation.y = rotateY;
+      viewer.autoRotate = false;
 
-      // Pause/resume on hover for idle effect
+      // Apply pose after skin loads
+      const applyPose = () => {
+        const skin = viewer.playerObject.skin;
+        if (!skin) return;
+
+        if (pose === 'archer') {
+          // ── Bow & Arrow: right arm raised aiming, left arm pulled back ──
+          skin.head.rotation.y = 0.4;
+          skin.head.rotation.x = -0.1;
+          skin.rightArm.rotation.x = -1.35;   // raise right arm up/forward
+          skin.rightArm.rotation.z = -0.25;
+          skin.leftArm.rotation.x  = -1.0;    // pull left arm back
+          skin.leftArm.rotation.z  = 0.45;
+          skin.rightLeg.rotation.x = -0.18;   // archer's stance — slight lean
+          skin.leftLeg.rotation.x  =  0.22;
+
+        } else if (pose === 'victory') {
+          // ── "You can't beat me": both arms raised wide triumphantly ──
+          skin.head.rotation.y = -0.2;
+          skin.head.rotation.x = -0.12;        // head tilted back slightly
+          skin.rightArm.rotation.z = -2.2;     // right arm up & out
+          skin.rightArm.rotation.x = -0.15;
+          skin.leftArm.rotation.z  =  2.2;     // left arm up & out (mirror)
+          skin.leftArm.rotation.x  = -0.15;
+          skin.rightLeg.rotation.x =  0.18;    // wide stance
+          skin.leftLeg.rotation.x  = -0.18;
+
+        } else if (pose === 'sleeping') {
+          // ── Sleeping: whole body laid on side, arms folded ──
+          viewer.playerObject.rotation.z =  1.55;  // lay the body flat
+          viewer.playerObject.rotation.y =  0;
+          viewer.playerObject.position.x =  6;
+          viewer.playerObject.position.y = -12;
+          skin.head.rotation.z           = -0.3;   // head resting
+          skin.head.rotation.y           =  0.3;
+          skin.rightArm.rotation.z       = -0.6;   // arm folded under
+          skin.leftArm.rotation.z        =  0.6;
+          skin.rightLeg.rotation.x       =  0.25;  // legs slightly bent
+          skin.leftLeg.rotation.x        = -0.15;
+        }
+      };
+
+      // Wait for skin texture to load then pose
+      setTimeout(applyPose, 300);
+
+      // Slow spin on hover, snap back on leave
       canvas.addEventListener('mouseenter', () => {
-        viewer.autoRotate = animation !== 'idle';
+        viewer.autoRotate = true;
+        viewer.autoRotateSpeed = 0.8;
       });
       canvas.addEventListener('mouseleave', () => {
-        viewer.autoRotate = animation === 'idle';
+        viewer.autoRotate = false;
+        viewer.playerObject.rotation.y = rotateY;
       });
     });
   }
 
-  // Wait for skinview3d to load
+  // Wait for skinview3d lib to fully load
   if (document.readyState === 'complete') {
     initSkinViewers();
   } else {
